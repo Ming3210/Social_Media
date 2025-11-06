@@ -1,7 +1,7 @@
 import { login } from '@/apis/auth.api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -20,7 +20,26 @@ export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
   const router = useRouter();
+
+  // Check if already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        if (token) {
+          router.replace('/screens/Home' as any);
+        } else {
+          setChecking(false);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setChecking(false);
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -47,7 +66,7 @@ export default function Login() {
       await AsyncStorage.setItem('accessToken', accessToken);
       if (refreshToken) await AsyncStorage.setItem('refreshToken', refreshToken);
 
-      router.replace('/screens/Home');
+      router.replace('/screens/Home' as any);
     } catch (err: any) {
       Alert.alert('Đăng nhập thất bại', 'Vui lòng kiểm tra lại thông tin.');
     } finally {
@@ -55,8 +74,19 @@ export default function Login() {
     }
   };
 
+  // Show loading while checking token
+  if (checking) {
+    return (
+      <SafeAreaView className="flex-1 bg-white">
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#0095f6" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView className="flex-1 bg-[#0a141e]">
+    <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
@@ -66,7 +96,7 @@ export default function Login() {
           keyboardShouldPersistTaps="handled"
         >
           {/* Ngôn ngữ */}
-          <Text className="text-gray-400 text-xs text-center mb-10">English (US)</Text>
+          <Text className="text-gray-600 text-xs text-center mb-10">English (US)</Text>
 
           {/* Logo Instagram */}
           <View className="items-center mb-10">
@@ -80,7 +110,7 @@ export default function Login() {
           {/* Form */}
           <View className="w-full">
             <TextInput
-              className="border border-[#304254] rounded-lg px-4 py-3 text-sm text-white mb-3"
+              className="border border-gray-300 rounded-lg px-4 py-3 text-sm text-black mb-3 bg-gray-50"
               placeholder="Username, email or mobile number"
               placeholderTextColor="#9ca3af"
               value={username}
@@ -89,7 +119,7 @@ export default function Login() {
               autoCorrect={false}
             />
             <TextInput
-              className="border border-[#304254] rounded-lg px-4 py-3 text-sm text-white mb-3"
+              className="border border-gray-300 rounded-lg px-4 py-3 text-sm text-black mb-3 bg-gray-50"
               placeholder="Password"
               placeholderTextColor="#9ca3af"
               value={password}
@@ -116,7 +146,7 @@ export default function Login() {
 
             {/* Forgot password */}
             <TouchableOpacity className="mt-4">
-              <Text className="text-[#b0b9c3] text-center text-sm">
+              <Text className="text-gray-600 text-center text-sm">
                 Forgot password?
               </Text>
             </TouchableOpacity>
@@ -124,15 +154,15 @@ export default function Login() {
 
           {/* Divider */}
           <View className="flex-row items-center my-6 w-full">
-            <View className="flex-1 h-px bg-[#304254]" />
+            <View className="flex-1 h-px bg-gray-300" />
             <Text className="text-gray-500 mx-4 text-xs font-semibold">OR</Text>
-            <View className="flex-1 h-px bg-[#304254]" />
+            <View className="flex-1 h-px bg-gray-300" />
           </View>
 
           {/* Create new account */}
           <TouchableOpacity
             onPress={() => router.push('/Register')}
-            className="border border-[#304254] rounded-full px-4 py-3 w-full mt-2"
+            className="border border-gray-300 rounded-full px-4 py-3 w-full mt-2"
           >
             <Text className="text-[#0095f6] text-center font-medium text-sm">
               Create new account

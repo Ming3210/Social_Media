@@ -31,6 +31,9 @@ public class User {
     private String fullName;
 
     @Column(nullable = false)
+    private String phoneNumber;
+
+    @Column(nullable = false)
     private String passwordHash;
 
     @Column(nullable = false, updatable = false)

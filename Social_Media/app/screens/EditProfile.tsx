@@ -158,27 +158,27 @@ export default function EditProfile() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-black" edges={['top']}>
+      <SafeAreaView className="flex-1 bg-white" edges={['top']}>
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#0095f6" />
-          <Text className="text-white mt-4">Đang tải...</Text>
+          <Text className="text-black mt-4">Đang tải...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-black" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
         {/* Header */}
-        <View className="flex-row justify-between items-center px-4 py-3 border-b border-[#1f2937]">
+        <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            <Ionicons name="arrow-back" size={24} color="#000000" />
           </TouchableOpacity>
-          <Text className="text-white font-semibold text-lg">Edit profile</Text>
+          <Text className="text-black font-semibold text-lg">Edit profile</Text>
           <TouchableOpacity onPress={handleUpdateProfile} disabled={updating}>
             {updating ? (
               <ActivityIndicator size="small" color="#0095f6" />
@@ -206,13 +206,13 @@ export default function EditProfile() {
                     resizeMode="cover"
                   />
                 ) : (
-                  <View className="w-24 h-24 rounded-full bg-[#1a1a1a] border-2 border-[#363636] items-center justify-center">
-                    <Ionicons name="person" size={48} color="#ffffff" />
+                  <View className="w-24 h-24 rounded-full bg-gray-200 border-2 border-gray-300 items-center justify-center">
+                    <Ionicons name="person" size={48} color="#9ca3af" />
                   </View>
                 )}
               </TouchableOpacity>
               <View className="flex-1">
-                <Text className="text-white font-semibold text-base mb-1">
+                <Text className="text-black font-semibold text-base mb-1">
                   {profile?.displayName || 'Username'}
                 </Text>
                 <TouchableOpacity
@@ -228,9 +228,9 @@ export default function EditProfile() {
 
             {/* Website Field */}
             <View className="mb-4">
-              <Text className="text-white font-semibold text-sm mb-2">Website</Text>
+              <Text className="text-black font-semibold text-sm mb-2">Website</Text>
               <TextInput
-                className="bg-[#1a1a1a] text-white px-4 py-3 rounded-lg border border-[#363636]"
+                className="bg-gray-50 text-black px-4 py-3 rounded-lg border border-gray-300"
                 placeholder="Website"
                 placeholderTextColor="#9ca3af"
                 value={editForm.website}
@@ -238,7 +238,7 @@ export default function EditProfile() {
                 keyboardType="url"
                 autoCapitalize="none"
               />
-              <Text className="text-gray-400 text-xs mt-2">
+              <Text className="text-gray-600 text-xs mt-2">
                 Editing your links is only available on mobile. Visit the Instagram app
                 and edit your profile to change the websites in your bio.
               </Text>
@@ -246,9 +246,9 @@ export default function EditProfile() {
 
             {/* Bio Field */}
             <View className="mb-4">
-              <Text className="text-white font-semibold text-sm mb-2">Bio</Text>
+              <Text className="text-black font-semibold text-sm mb-2">Bio</Text>
               <TextInput
-                className="bg-[#1a1a1a] text-white px-4 py-3 rounded-lg border border-[#363636]"
+                className="bg-gray-50 text-black px-4 py-3 rounded-lg border border-gray-300"
                 placeholder="Bio"
                 placeholderTextColor="#9ca3af"
                 value={editForm.bio}
@@ -258,16 +258,16 @@ export default function EditProfile() {
                 maxLength={150}
                 textAlignVertical="top"
               />
-              <Text className="text-gray-400 text-xs mt-2 text-right">
+              <Text className="text-gray-600 text-xs mt-2 text-right">
                 {editForm.bio.length} / 150
               </Text>
             </View>
 
             {/* Display Name Field */}
             <View className="mb-4">
-              <Text className="text-white font-semibold text-sm mb-2">Display Name</Text>
+              <Text className="text-black font-semibold text-sm mb-2">Display Name</Text>
               <TextInput
-                className="bg-[#1a1a1a] text-white px-4 py-3 rounded-lg border border-[#363636]"
+                className="bg-gray-50 text-black px-4 py-3 rounded-lg border border-gray-300"
                 placeholder="Display Name"
                 placeholderTextColor="#9ca3af"
                 value={editForm.displayName}
@@ -277,9 +277,9 @@ export default function EditProfile() {
 
             {/* Location Field */}
             <View className="mb-4">
-              <Text className="text-white font-semibold text-sm mb-2">Location</Text>
+              <Text className="text-black font-semibold text-sm mb-2">Location</Text>
               <TextInput
-                className="bg-[#1a1a1a] text-white px-4 py-3 rounded-lg border border-[#363636]"
+                className="bg-gray-50 text-black px-4 py-3 rounded-lg border border-gray-300"
                 placeholder="Location"
                 placeholderTextColor="#9ca3af"
                 value={editForm.location}

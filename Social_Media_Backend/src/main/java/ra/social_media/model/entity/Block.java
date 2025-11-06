@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @IdClass(Block.BlockId.class)
+@Builder
 public class Block {
 
     @Id

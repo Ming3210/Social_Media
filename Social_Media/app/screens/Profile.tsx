@@ -68,10 +68,10 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-black" edges={['top']}>
+      <SafeAreaView className="flex-1 bg-white" edges={['top']}>
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#0095f6" />
-          <Text className="text-white mt-4">Đang tải...</Text>
+          <Text className="text-black mt-4">Đang tải...</Text>
         </View>
       </SafeAreaView>
     );
@@ -97,21 +97,21 @@ export default function Profile() {
     : [];
 
   return (
-    <SafeAreaView className="flex-1 bg-black" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
       {/* Header */}
-      <View className="flex-row justify-between items-center px-4 py-3">
+      <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-200">
         <TouchableOpacity className="flex-row items-center gap-2">
-          <Text className="text-white font-semibold text-lg">
+          <Text className="text-black font-semibold text-lg">
             {profile?.displayName || 'Username'}
           </Text>
-          <Ionicons name="chevron-down" size={20} color="#ffffff" />
+          <Ionicons name="chevron-down" size={20} color="#000000" />
         </TouchableOpacity>
         <View className="flex-row gap-5">
           <TouchableOpacity>
-            <Ionicons name="settings-outline" size={24} color="#ffffff" />
+            <Ionicons name="settings-outline" size={24} color="#000000" />
           </TouchableOpacity>
           <TouchableOpacity>
-            <Ionicons name="paper-plane-outline" size={24} color="#ffffff" />
+            <Ionicons name="paper-plane-outline" size={24} color="#000000" />
           </TouchableOpacity>
         </View>
       </View>
@@ -129,8 +129,8 @@ export default function Profile() {
                   resizeMode="cover"
                 />
               ) : (
-                <View className="w-24 h-24 rounded-full bg-[#262626] border-2 border-white items-center justify-center">
-                  <Ionicons name="person" size={48} color="#ffffff" />
+                <View className="w-24 h-24 rounded-full bg-gray-200 border-2 border-gray-300 items-center justify-center">
+                  <Ionicons name="person" size={48} color="#9ca3af" />
                 </View>
               )}
             </View>
@@ -138,7 +138,7 @@ export default function Profile() {
             {/* Stats and Info */}
             <View className="flex-1">
               {/* Username */}
-              <Text className="text-white font-semibold text-lg mb-4">
+              <Text className="text-black font-semibold text-lg mb-4">
                 {profile?.displayName || 'Username'}
               </Text>
 
@@ -146,10 +146,10 @@ export default function Profile() {
               <View className="flex-row justify-around mb-4">
                 {stats.map((stat) => (
                   <View key={stat.label} className="items-center">
-                    <Text className="text-white font-semibold text-base">
+                    <Text className="text-black font-semibold text-base">
                       {stat.value}
                     </Text>
-                    <Text className="text-gray-400 text-xs uppercase">
+                    <Text className="text-gray-600 text-xs uppercase">
                       {stat.label}
                     </Text>
                   </View>
@@ -162,12 +162,12 @@ export default function Profile() {
           {profile && (
             <View className="mb-4">
               {profile.displayName && (
-                <Text className="text-white font-semibold text-sm mb-1">
+                <Text className="text-black font-semibold text-sm mb-1">
                   {profile.displayName}
                 </Text>
               )}
               {profile.bio && (
-                <Text className="text-white text-sm mb-1">{profile.bio}</Text>
+                <Text className="text-black text-sm mb-1">{profile.bio}</Text>
               )}
               {profile.website && (
                 <Text className="text-[#0095f6] text-sm mb-1">
@@ -175,7 +175,7 @@ export default function Profile() {
                 </Text>
               )}
               {profile.location && (
-                <Text className="text-gray-400 text-sm">{profile.location}</Text>
+                <Text className="text-gray-600 text-sm">{profile.location}</Text>
               )}
             </View>
           )}
@@ -183,26 +183,76 @@ export default function Profile() {
           {/* Action Buttons */}
           <View className="flex-row gap-2 mb-4">
             <TouchableOpacity
-              className="flex-1 py-2.5 rounded-lg bg-[#262626] border border-[#363636]"
+              className="flex-1 py-2.5 rounded-lg bg-gray-100 border border-gray-300"
               onPress={handleEditProfile}
             >
-              <Text className="text-white text-center font-semibold text-sm">
+              <Text className="text-black text-center font-semibold text-sm">
                 Edit profile
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity className="flex-1 py-2.5 rounded-lg bg-[#262626] border border-[#363636]">
-              <Text className="text-white text-center font-semibold text-sm">
+            <TouchableOpacity className="flex-1 py-2.5 rounded-lg bg-gray-100 border border-gray-300">
+              <Text className="text-black text-center font-semibold text-sm">
                 View archive
               </Text>
             </TouchableOpacity>
           </View>
 
+          {/* Friends & Block Actions */}
+          <View className="flex-row gap-2 mb-2">
+            <TouchableOpacity
+              className="flex-1 py-2.5 rounded-lg bg-gray-100 border border-gray-300"
+              onPress={() => router.push('/screens/SearchFriends')}
+            >
+              <View className="flex-row items-center justify-center gap-2">
+                <Ionicons name="search" size={16} color="#000000" />
+                <Text className="text-black text-center font-semibold text-sm">
+                  Tìm bạn
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="flex-1 py-2.5 rounded-lg bg-gray-100 border border-gray-300"
+              onPress={() => router.push('/screens/FriendRequests')}
+            >
+              <View className="flex-row items-center justify-center gap-2">
+                <Ionicons name="person-add" size={16} color="#000000" />
+                <Text className="text-black text-center font-semibold text-sm">
+                  Lời mời
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+          <View className="flex-row gap-2 mb-4">
+            <TouchableOpacity
+              className="flex-1 py-2.5 rounded-lg bg-gray-100 border border-gray-300"
+              onPress={() => router.push('/screens/AllFriends')}
+            >
+              <View className="flex-row items-center justify-center gap-2">
+                <Ionicons name="people" size={16} color="#000000" />
+                <Text className="text-black text-center font-semibold text-sm">
+                  Tất cả bạn bè
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="flex-1 py-2.5 rounded-lg bg-gray-100 border border-gray-300"
+              onPress={() => router.push('/screens/BlockedUsers')}
+            >
+              <View className="flex-row items-center justify-center gap-2">
+                <Ionicons name="ban" size={16} color="#000000" />
+                <Text className="text-black text-center font-semibold text-sm">
+                  Đã chặn
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+
           {/* Content Tabs */}
-          <View className="flex-row border-t border-[#262626] mt-2">
+          <View className="flex-row border-t border-gray-200 mt-2">
             <TouchableOpacity
               className={`flex-1 items-center py-3 border-t-2 ${
                 activeTab === 'posts'
-                  ? 'border-white'
+                  ? 'border-black'
                   : 'border-transparent'
               }`}
               onPress={() => setActiveTab('posts')}
@@ -210,13 +260,13 @@ export default function Profile() {
               <Ionicons
                 name={activeTab === 'posts' ? 'grid' : 'grid-outline'}
                 size={24}
-                color={activeTab === 'posts' ? '#ffffff' : '#8e8e8e'}
+                color={activeTab === 'posts' ? '#000000' : '#8e8e8e'}
               />
             </TouchableOpacity>
             <TouchableOpacity
               className={`flex-1 items-center py-3 border-t-2 ${
                 activeTab === 'reels'
-                  ? 'border-white'
+                  ? 'border-black'
                   : 'border-transparent'
               }`}
               onPress={() => setActiveTab('reels')}
@@ -224,13 +274,13 @@ export default function Profile() {
               <Ionicons
                 name={activeTab === 'reels' ? 'tv' : 'tv-outline'}
                 size={24}
-                color={activeTab === 'reels' ? '#ffffff' : '#8e8e8e'}
+                color={activeTab === 'reels' ? '#000000' : '#8e8e8e'}
               />
             </TouchableOpacity>
             <TouchableOpacity
               className={`flex-1 items-center py-3 border-t-2 ${
                 activeTab === 'saved'
-                  ? 'border-white'
+                  ? 'border-black'
                   : 'border-transparent'
               }`}
               onPress={() => setActiveTab('saved')}
@@ -238,13 +288,13 @@ export default function Profile() {
               <Ionicons
                 name={activeTab === 'saved' ? 'bookmark' : 'bookmark-outline'}
                 size={24}
-                color={activeTab === 'saved' ? '#ffffff' : '#8e8e8e'}
+                color={activeTab === 'saved' ? '#000000' : '#8e8e8e'}
               />
             </TouchableOpacity>
             <TouchableOpacity
               className={`flex-1 items-center py-3 border-t-2 ${
                 activeTab === 'tagged'
-                  ? 'border-white'
+                  ? 'border-black'
                   : 'border-transparent'
               }`}
               onPress={() => setActiveTab('tagged')}
@@ -252,7 +302,7 @@ export default function Profile() {
               <Ionicons
                 name={activeTab === 'tagged' ? 'person' : 'person-outline'}
                 size={24}
-                color={activeTab === 'tagged' ? '#ffffff' : '#8e8e8e'}
+                color={activeTab === 'tagged' ? '#000000' : '#8e8e8e'}
               />
             </TouchableOpacity>
           </View>
@@ -275,13 +325,13 @@ export default function Profile() {
             </View>
           ) : (
             <View className="items-center justify-center py-20">
-              <View className="w-24 h-24 border-2 border-white rounded-full items-center justify-center mb-6">
-                <Ionicons name="camera-outline" size={48} color="#ffffff" />
+              <View className="w-24 h-24 border-2 border-gray-300 rounded-full items-center justify-center mb-6">
+                <Ionicons name="camera-outline" size={48} color="#9ca3af" />
               </View>
-              <Text className="text-white font-bold text-xl mb-2">
+              <Text className="text-black font-bold text-xl mb-2">
                 Share Photos
               </Text>
-              <Text className="text-gray-400 text-sm text-center mb-6 px-8">
+              <Text className="text-gray-600 text-sm text-center mb-6 px-8">
                 When you share photos, they will appear on your profile.
               </Text>
               <TouchableOpacity

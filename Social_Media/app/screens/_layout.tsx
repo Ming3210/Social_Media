@@ -6,11 +6,11 @@ export default function ScreensLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#ffffff',
-        tabBarInactiveTintColor: '#9ca3af',
+        tabBarActiveTintColor: '#000000',
+        tabBarInactiveTintColor: '#8e8e8e',
         tabBarStyle: {
-          backgroundColor: '#0a141e',
-          borderTopColor: '#1f2937',
+          backgroundColor: '#ffffff',
+          borderTopColor: '#dbdbdb',
           borderTopWidth: 1,
         },
         headerShown: false,
@@ -54,6 +54,30 @@ export default function ScreensLayout() {
       />
       <Tabs.Screen
         name="EditProfile"
+        options={{
+          tabBarButton: () => null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="SearchFriends"
+        options={{
+          tabBarButton: () => null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="FriendRequests"
+        options={{
+          tabBarButton: () => null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="BlockedUsers"
+        options={{
+          tabBarButton: () => null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="AllFriends"
         options={{
           tabBarButton: () => null, // Hide from tab bar
         }}

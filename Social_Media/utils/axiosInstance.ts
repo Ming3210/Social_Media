@@ -1,17 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { Platform } from 'react-native';
 
 // Xác định baseURL dựa trên platform
 // Android emulator: 10.0.2.2 trỏ đến localhost của máy host
 // iOS simulator và web: localhost hoạt động trực tiếp
 // Thiết bị thật: cần thay bằng IP LAN của máy chạy backend (ví dụ: 192.168.1.xxx)
 const getBaseURL = () => {
-  if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:8080/api/v1';
-  }
-  // iOS simulator hoặc web
-  return 'http://localhost:8080/api/v1';
+  // Sử dụng IP LAN cho tất cả platforms
+  return 'http:/192.168.62.2:8080/api/v1';
 };
 
 const axiosInstance = axios.create({

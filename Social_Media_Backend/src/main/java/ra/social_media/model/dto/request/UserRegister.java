@@ -29,4 +29,8 @@ public class UserRegister {
     @NotBlank(message = "Full name cannot be empty")
     @Size(max = 50, message = "Full name cannot exceed 50 characters")
     private String fullName;
+
+    @NotBlank(message = "Phone number cannot be empty")
+    @Size(min = 10, max = 15, message = "Phone number must be between 10 and 15 characters")
+    private String phoneNumber;
 }

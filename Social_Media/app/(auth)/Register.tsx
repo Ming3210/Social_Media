@@ -19,13 +19,14 @@ export default function Register() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [fullName, setFullName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!username || !email || !fullName || !password || !confirmPassword) {
+    if (!username || !email || !phoneNumber || !fullName || !password || !confirmPassword) {
       Alert.alert('Thiếu thông tin', 'Vui lòng điền đầy đủ các trường.');
       return;
     }
@@ -39,7 +40,7 @@ export default function Register() {
     }
     try {
       setLoading(true);
-      await registerApi({ username, email, fullName, password });
+      await registerApi({ username, email, phoneNumber, fullName, password });
       Alert.alert('Đăng ký thành công', 'Hãy đăng nhập để tiếp tục.');
       router.replace('/Login');
     } catch (err: any) {
@@ -103,6 +104,14 @@ export default function Register() {
               autoCorrect={false}
               value={email}
               onChangeText={setEmail}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Số điện thoại"
+              placeholderTextColor="#8e8e8e"
+              keyboardType="phone-pad"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
               style={styles.input}
             />
             <TextInput

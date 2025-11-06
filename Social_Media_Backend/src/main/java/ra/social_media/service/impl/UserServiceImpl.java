@@ -5,9 +5,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ra.social_media.exception.HttpConflict;
+import ra.social_media.exception.HttpUnAuthorized;
 import ra.social_media.model.dto.request.UserLogin;
 import ra.social_media.model.dto.request.UserRegister;
 import ra.social_media.model.dto.response.JWTResponse;
@@ -23,6 +25,7 @@ import ra.social_media.service.UserService;
 import ra.social_media.model.entity.Profile;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -44,6 +47,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+
+
     @Override
     public UserRegisterResponse register(UserRegister userRegister) {
         if(userRepository.findByUsername(userRegister.getUsername()).isPresent()) {
@@ -58,6 +64,7 @@ public class UserServiceImpl implements UserService {
                 .fullName(userRegister.getFullName())
                 .email(userRegister.getEmail())
                 .status(true)
+                .phoneNumber(userRegister.getPhoneNumber())
                 .createdAt(Instant.now())
                 .lastSeenAt(Instant.now())
                 .build();
@@ -121,4 +128,34 @@ public class UserServiceImpl implements UserService {
                 .accessToken(token)
                 .refreshToken(refreshToken)
                 .build();    }
+
+    @Override
+    public List<User> getAllUsers() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserPrincipal userPrincipal)) {
+            throw new HttpUnAuthorized("User not authenticated");
+        }
+
+        User currentUser = getUserByUsername(userPrincipal.getUsername());
+        Long currentUserId = currentUser.getId();
+
+        List<User> matchedUsers;
+
+
+        matchedUsers = userRepository.findAll();
+
+        matchedUsers = matchedUsers.stream()
+                .filter(u -> !u.getId().equals(currentUserId))
+                .toList();
+
+        return matchedUsers;
+
+    }
+
+
+    @Override
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+
+    }
 }
