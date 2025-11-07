@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ra.social_media.model.dto.response.ApiDataResponse;
 import ra.social_media.model.dto.response.FriendResponse;
+import ra.social_media.model.dto.response.UserSearchResponse;
 import ra.social_media.service.FriendService;
 
 import java.util.List;
@@ -17,10 +18,10 @@ public class FriendController {
     private FriendService friendService;
 
     @GetMapping("/search")
-    public ResponseEntity<ApiDataResponse<List<FriendResponse>>> searchFriendByPhoneNumber(
+    public ResponseEntity<ApiDataResponse<List<UserSearchResponse>>> searchFriendByPhoneNumber(
             @RequestParam(required = false, defaultValue = "") String phoneNumber) {
-        List<FriendResponse> responses = friendService.searchFriendByPhoneNumber(phoneNumber);
-        ApiDataResponse<List<FriendResponse>> apiResponse = new ApiDataResponse<>(
+        List<UserSearchResponse> responses = friendService.searchFriendByPhoneNumber(phoneNumber);
+        ApiDataResponse<List<UserSearchResponse>> apiResponse = new ApiDataResponse<>(
                 true,
                 responses,
                 "Search completed successfully",

@@ -24,12 +24,20 @@ public class FriendResponse {
         if (friend == null) {
             return null;
         }
+        
+        // Determine receiverId: the user who is NOT the requester
+        Long receiverId = null;
+        if (friend.getRequester() != null) {
+            if (friend.getUser1() != null && !friend.getUser1().getId().equals(friend.getRequester().getId())) {
+                receiverId = friend.getUser1().getId();
+            } else if (friend.getUser2() != null && !friend.getUser2().getId().equals(friend.getRequester().getId())) {
+                receiverId = friend.getUser2().getId();
+            }
+        }
+        
         return FriendResponse.builder()
                 .requesterId(friend.getRequester() != null ? friend.getRequester().getId() : null)
-                .receiverId(friend.getUser2() != null ? friend.getUser2().getId() : 
-                          (friend.getUser1() != null && friend.getRequester() != null && 
-                           !friend.getUser1().getId().equals(friend.getRequester().getId())) ? 
-                          friend.getUser1().getId() : null)
+                .receiverId(receiverId)
                 .status(friend.getStatus())
                 .createdAt(friend.getCreatedAt())
                 .acceptAt(friend.getAcceptedAt())

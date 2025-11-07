@@ -13,6 +13,8 @@ public interface UserService {
 
     JWTResponse login(UserLogin userLogin);
 
+    JWTResponse refreshToken(String refreshToken);
+
     List<User> getAllUsers();
 
     User getUserByUsername(String username);

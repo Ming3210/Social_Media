@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface FriendRepository extends JpaRepository<Friend, Friend.FriendId> {
-    <T> Optional<Friend> findByUser1IdAndUser2Id(Long user1Id, Long user2Id);
+    Optional<Friend> findByUser1IdAndUser2Id(Long user1Id, Long user2Id);
     Optional<Friend> findByUser1IdAndUser2IdAndStatus(Long user1Id, Long user2Id, FriendStatus status);
     boolean existsByUser1IdAndUser2Id(Long user1Id, Long user2Id);
 

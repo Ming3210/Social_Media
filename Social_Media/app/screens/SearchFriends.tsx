@@ -98,15 +98,64 @@ export default function SearchFriends() {
         ? receivedRes.data.map((req) => Number(req.requesterId))
         : []
     );
-    const friendIds = new Set(
-      friendsRes?.success && friendsRes.data
-        ? friendsRes.data.map((friend) => Number(friend.id))
-        : []
-    );
+
+    // Determine current user ID from sent/received requests
+    let currentUserId: number | null = null;
+    if (sentRes?.success && sentRes.data && sentRes.data.length > 0) {
+      currentUserId = Number(sentRes.data[0].requesterId);
+    } else if (receivedRes?.success && receivedRes.data && receivedRes.data.length > 0) {
+      currentUserId = Number(receivedRes.data[0].receiverId);
+    }
+    
+    // Nếu vẫn chưa có currentUserId, thử lấy từ friends data
+    // Tìm user ID xuất hiện nhiều nhất trong friends data (có thể là current user)
+    if (currentUserId === null && friendsRes?.success && friendsRes.data && friendsRes.data.length > 0) {
+      const userIdCounts = new Map<number, number>();
+      friendsRes.data.forEach((friend: any) => {
+        const requesterId = Number(friend.requesterId);
+        const receiverId = Number(friend.receiverId);
+        
+        userIdCounts.set(requesterId, (userIdCounts.get(requesterId) || 0) + 1);
+        userIdCounts.set(receiverId, (userIdCounts.get(receiverId) || 0) + 1);
+      });
+      
+      // Tìm user ID xuất hiện nhiều nhất (có thể là current user)
+      let maxCount = 0;
+      let mostFrequentUserId: number | null = null;
+      userIdCounts.forEach((count, userId) => {
+        if (count > maxCount) {
+          maxCount = count;
+          mostFrequentUserId = userId;
+        }
+      });
+      
+      if (mostFrequentUserId !== null) {
+        currentUserId = mostFrequentUserId;
+      }
+    }
+
+    // Process friends data - friendsRes.data is FriendRequest[] with requesterId and receiverId
+    const friendIds = new Set<number>();
+    if (friendsRes?.success && friendsRes.data && currentUserId !== null) {
+      friendsRes.data.forEach((friend: any) => {
+        const requesterId = Number(friend.requesterId);
+        const receiverId = Number(friend.receiverId);
+        
+        // If current user is requester, receiver is friend
+        if (requesterId === currentUserId) {
+          friendIds.add(receiverId);
+        }
+        // If current user is receiver, requester is friend
+        else if (receiverId === currentUserId) {
+          friendIds.add(requesterId);
+        }
+      });
+    }
 
     // Debug log
     if (friendsRes?.success && friendsRes.data) {
       console.log('Friends data:', friendsRes.data);
+      console.log('Current user ID:', currentUserId);
       console.log('Friend IDs:', Array.from(friendIds));
     }
 
@@ -179,24 +228,97 @@ export default function SearchFriends() {
       }
       return await sendFriendRequest(userId);
     },
-    onMutate: (userId) => {
+    onMutate: async (userId) => {
       setProcessingUserIds((prev) => new Set(prev).add(userId));
+      
+      // Optimistic update: Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.sentRequests });
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.receivedRequests });
+      
+      // Snapshot the previous value
+      const previousSentRequests = queryClient.getQueryData(QUERY_KEYS.sentRequests);
+      const previousReceivedRequests = queryClient.getQueryData(QUERY_KEYS.receivedRequests);
+      
+      // Get current user ID from sent requests or received requests
+      let currentUserId: number | null = null;
+      const sentData = previousSentRequests as any;
+      const receivedData = previousReceivedRequests as any;
+      
+      if (sentData?.success && sentData.data && sentData.data.length > 0) {
+        currentUserId = Number(sentData.data[0].requesterId);
+      } else if (receivedData?.success && receivedData.data && receivedData.data.length > 0) {
+        currentUserId = Number(receivedData.data[0].receiverId);
+      }
+      
+      if (!currentUserId) {
+        // If we can't determine current user ID, just return without optimistic update
+        return { previousSentRequests, previousReceivedRequests };
+      }
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(QUERY_KEYS.sentRequests, (old: any) => {
+        if (!old?.success) return old;
+        
+        const oldData = old.data || [];
+        
+        // Check if request already exists
+        const exists = oldData.some((req: any) => Number(req.receiverId) === userId);
+        if (exists) return old;
+        
+        // Add new request optimistically
+        const newRequest = {
+          requesterId: currentUserId,
+          receiverId: userId,
+          status: 'PENDING',
+          createdAt: new Date().toISOString(),
+        };
+        
+        return {
+          ...old,
+          data: [...oldData, newRequest],
+        };
+      });
+      
+      return { previousSentRequests, previousReceivedRequests, currentUserId };
     },
-    onSuccess: () => {
-      // Invalidate queries to refetch data
+    onSuccess: (data) => {
+      // Invalidate queries to refetch data and ensure consistency
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.sentRequests });
-      Alert.alert('Thành công', 'Đã gửi lời mời kết bạn');
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.allUsers });
+      
+      // If status is ACCEPTED (auto-accept when profile is not private), invalidate friends query
+      if (data?.data?.status === 'ACCEPTED') {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.friends });
+        Alert.alert('Thành công', 'Đã kết bạn thành công!');
+      } else {
+        Alert.alert('Thành công', 'Đã gửi lời mời kết bạn');
+      }
     },
-    onError: (error: any) => {
+    onError: (error: any, userId, context) => {
       console.error('Send request error:', error);
+      // Rollback optimistic update
+      if (context?.previousSentRequests) {
+        queryClient.setQueryData(QUERY_KEYS.sentRequests, context.previousSentRequests);
+      }
+      if (context?.previousReceivedRequests) {
+        queryClient.setQueryData(QUERY_KEYS.receivedRequests, context.previousReceivedRequests);
+      }
       Alert.alert('Lỗi', error.response?.data?.message || 'Không thể gửi lời mời');
     },
-    onSettled: (_, __, userId) => {
+    onSettled: (data, __, userId) => {
       setProcessingUserIds((prev) => {
         const newSet = new Set(prev);
         newSet.delete(userId);
         return newSet;
       });
+      // Always refetch to ensure consistency
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.sentRequests });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.allUsers });
+      
+      // If status is ACCEPTED, also invalidate friends query
+      if (data?.data?.status === 'ACCEPTED') {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.friends });
+      }
     },
   });
 
@@ -207,15 +329,40 @@ export default function SearchFriends() {
       }
       return await cancelFriendRequest(userId);
     },
-    onMutate: (userId) => {
+    onMutate: async (userId) => {
       setProcessingUserIds((prev) => new Set(prev).add(userId));
+      
+      // Optimistic update: Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.sentRequests });
+      
+      // Snapshot the previous value
+      const previousSentRequests = queryClient.getQueryData(QUERY_KEYS.sentRequests);
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(QUERY_KEYS.sentRequests, (old: any) => {
+        if (!old?.success || !old?.data) return old;
+        
+        // Remove the request optimistically
+        return {
+          ...old,
+          data: old.data.filter((req: any) => Number(req.receiverId) !== userId),
+        };
+      });
+      
+      return { previousSentRequests };
     },
     onSuccess: () => {
+      // Invalidate queries to refetch data and ensure consistency
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.sentRequests });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.allUsers });
       Alert.alert('Thành công', 'Đã hủy lời mời kết bạn');
     },
-    onError: (error: any) => {
+    onError: (error: any, userId, context) => {
       console.error('Cancel request error:', error);
+      // Rollback optimistic update
+      if (context?.previousSentRequests) {
+        queryClient.setQueryData(QUERY_KEYS.sentRequests, context.previousSentRequests);
+      }
       Alert.alert('Lỗi', 'Không thể hủy lời mời');
     },
     onSettled: (_, __, userId) => {
@@ -224,6 +371,9 @@ export default function SearchFriends() {
         newSet.delete(userId);
         return newSet;
       });
+      // Always refetch to ensure consistency
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.sentRequests });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.allUsers });
     },
   });
 

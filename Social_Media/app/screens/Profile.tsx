@@ -32,10 +32,34 @@ export default function Profile() {
       const res = await getProfile();
       if (res.success && res.data) {
         setProfile(res.data);
+      } else {
+        Alert.alert('Lỗi', res.message || 'Không thể tải thông tin profile');
       }
     } catch (error: any) {
       console.error('Fetch profile error:', error);
-      Alert.alert('Lỗi', 'Không thể tải thông tin profile');
+      
+      // Xử lý token hết hạn
+      if (error.isTokenExpired || error.response?.status === 401) {
+        await AsyncStorage.multiRemove(['accessToken', 'refreshToken']);
+        Alert.alert(
+          'Phiên đăng nhập hết hạn',
+          'Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại.',
+          [
+            {
+              text: 'Đăng nhập lại',
+              onPress: () => router.replace('/Login'),
+            },
+          ]
+        );
+        return;
+      }
+      
+      // Xử lý lỗi không tìm thấy profile
+      if (error.response?.status === 404 || error.message?.includes('không tồn tại')) {
+        Alert.alert('Lỗi', 'Không tìm thấy profile này. Vui lòng thử lại sau.');
+      } else {
+        Alert.alert('Lỗi', error.message || 'Không thể tải thông tin profile');
+      }
     } finally {
       setLoading(false);
     }

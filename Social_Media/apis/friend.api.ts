@@ -92,7 +92,8 @@ export const removeFriend = async (friendUserId: number): Promise<FriendResponse
 };
 
 // GET /api/v1/friends/search - Get all friends (ACCEPTED status)
-export const getAllFriends = async (): Promise<FriendSearchResponse> => {
+// Returns FriendRequest[] with requesterId and receiverId
+export const getAllFriends = async (): Promise<FriendRequestsResponse> => {
   const res = await axiosInstance.get('/friends/search');
   return res.data;
 };

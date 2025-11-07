@@ -32,6 +32,15 @@ public class AuthController {
     }
 
 
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiDataResponse<JWTResponse>> refreshToken(@RequestBody java.util.Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return new ResponseEntity<>(new ApiDataResponse<>(false, null, "Refresh token is required", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(new ApiDataResponse<>(true, userService.refreshToken(refreshToken), "success", HttpStatus.OK), HttpStatus.OK);
+    }
+
     @GetMapping("/all")
     public ResponseEntity<ApiDataResponse<List<User>>> getAllUsers() {
         return new ResponseEntity<>(new ApiDataResponse<>(true,userService.getAllUsers(), "success",  HttpStatus.OK), HttpStatus.OK);

@@ -154,6 +154,33 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
+    public JWTResponse refreshToken(String refreshToken) {
+        String newAccessToken = jwtProvider.refreshAccessToken(refreshToken);
+        if (newAccessToken == null) {
+            throw new HttpUnAuthorized("Refresh token không hợp lệ hoặc đã hết hạn");
+        }
+        
+        String username = jwtProvider.getUsernameFromToken(refreshToken);
+        User user = getUserByUsername(username);
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .username(user.getUsername())
+                .password(user.getPasswordHash())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .isActive(user.getStatus())
+                .build();
+        
+        return JWTResponse.builder()
+                .username(userPrincipal.getUsername())
+                .fullName(userPrincipal.getFullName())
+                .email(userPrincipal.getEmail())
+                .isActive(user.getStatus())
+                .accessToken(newAccessToken)
+                .refreshToken(refreshToken) // Giữ nguyên refresh token
+                .build();
+    }
+
+    @Override
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
 

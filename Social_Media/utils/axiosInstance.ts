@@ -79,20 +79,70 @@ axiosInstance.interceptors.response.use(
     }
     
     const originalRequest = error.config;
+    
+    // Xử lý refresh token khi nhận 401
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Tránh refresh nếu đang gọi refresh endpoint
+      if (originalRequest.url?.includes('/auth/refresh')) {
+        // Refresh token cũng hết hạn, cần logout
+        await AsyncStorage.multiRemove(['accessToken', 'refreshToken']);
+        const refreshError = new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        (refreshError as any).isTokenExpired = true;
+        return Promise.reject(refreshError);
+      }
+      
       originalRequest._retry = true;
       const refreshToken = await AsyncStorage.getItem('refreshToken');
+      
       if (refreshToken) {
-        const res = await axios.post(
-          `${getBaseURL()}/auth/refresh`,
-          { refreshToken }
-        );
-        const newToken = res.data.accessToken;
-        await AsyncStorage.setItem('accessToken', newToken);
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        return axiosInstance(originalRequest);
+        try {
+          const res = await axios.post(
+            `${getBaseURL()}/auth/refresh`,
+            { refreshToken },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          
+          // Kiểm tra response structure
+          const responseData = res.data;
+          let newAccessToken: string | null = null;
+          
+          if (responseData?.data?.accessToken) {
+            // Format: { success: true, data: { accessToken: ... } }
+            newAccessToken = responseData.data.accessToken;
+          } else if (responseData?.accessToken) {
+            // Format: { accessToken: ... }
+            newAccessToken = responseData.accessToken;
+          }
+          
+          if (newAccessToken) {
+            await AsyncStorage.setItem('accessToken', newAccessToken);
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            // Retry original request với token mới
+            return axiosInstance(originalRequest);
+          } else {
+            throw new Error('Không nhận được access token mới');
+          }
+        } catch (refreshError: any) {
+          console.error('Refresh token error:', refreshError);
+          // Refresh token thất bại, xóa tokens và logout
+          await AsyncStorage.multiRemove(['accessToken', 'refreshToken']);
+          const tokenExpiredError = new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+          (tokenExpiredError as any).isTokenExpired = true;
+          return Promise.reject(tokenExpiredError);
+        }
+      } else {
+        // Không có refresh token, cần logout
+        await AsyncStorage.multiRemove(['accessToken', 'refreshToken']);
+        const tokenExpiredError = new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        (tokenExpiredError as any).isTokenExpired = true;
+        return Promise.reject(tokenExpiredError);
       }
     }
+    
     return Promise.reject(error);
   }
 );
